@@ -1,0 +1,42 @@
+name: business_standart_web
+description: Веб-платформа для оценочной компании Business Standart
+version: 1.0.0+1
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # HTTP client
+  http: ^1.1.0
+  
+  # State management
+  provider: ^6.1.0
+  
+  # SVG support
+  flutter_svg: ^2.0.9
+  
+  # Internationalization
+  intl: ^0.18.1
+  
+  # Local storage
+  shared_preferences: ^2.2.2
+  
+  # URL launcher
+  url_launcher: ^6.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/geojson/

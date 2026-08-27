@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "business-standart-backend"
+version = "1.0.0"
+description = "Backend для веб-платформы оценочной компании Business Standart"
+authors = ["Business Standart <business_standart@mail.ru>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+sqlalchemy = "^2.0.23"
+alembic = "^1.12.1"
+asyncpg = "^0.29.0"
+pydantic = {extras = ["email"], version = "^2.5.0"}
+pydantic-settings = "^2.1.0"
+celery = "^5.3.4"
+redis = "^5.0.1"
+httpx = "^0.25.2"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+bcrypt = "^4.1.1"
+boto3 = "^1.29.7"
+slowapi = "^0.1.9"
+python-multipart = "^0.0.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
+hypothesis = "^6.92.1"
+testcontainers = "^3.7.1"
+black = "^23.11.0"
+flake8 = "^6.1.0"
+mypy = "^1.7.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
