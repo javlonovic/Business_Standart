@@ -1,0 +1,82 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Fault Condition** - Settings Instantiation with Comma-Separated CORS_ORIGINS in Docker
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases: Docker startup with comma-separated CORS_ORIGINS
+  - Test that Settings successfully parses comma-separated CORS_ORIGINS (e.g., "http://localhost:3000,http://localhost:8080") into List[str] without raising json.decoder.JSONDecodeError
+  - Test with multiple concrete cases: single origin, multiple origins, origins with different protocols
+  - The test assertions should verify: (1) no JSON decoding errors during Settings instantiation, (2) CORS_ORIGINS field contains correctly parsed list of origin strings, (3) application can start successfully
+  - Run test on UNFIXED code in Docker environment
+  - **EXPECTED OUTCOME**: Test FAILS with json.decoder.JSONDecodeError (this is correct - it proves the bug exists)
+  - Document counterexamples found: exact error messages, failing configurations, stack traces
+  - Examine failures to understand if root cause is pydantic-settings JSON parsing before validator, Docker env var handling, or validator timing
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+- [-] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Existing Configuration Loading
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on working configurations (if possible to test outside Docker context where bug doesn't trigger)
+  - Test cases to observe:
+    - CORS_ORIGINS as JSON array format `'["http://localhost:3000"]'` should parse to list correctly
+    - Empty or missing CORS_ORIGINS should default to empty list
+    - All other environment variables (DATABASE_URL, REDIS_URL, SECRET_KEY, etc.) should load unchanged
+    - Non-Docker environments should load Settings identically
+  - Write property-based tests capturing observed behavior patterns:
+    - For all valid JSON array format CORS_ORIGINS, parsing result should match expected list
+    - For all other environment variables, Settings should load values identically before and after fix
+    - For all working configuration scenarios, Settings instantiation should succeed without errors
+  - Property-based testing generates many test cases for stronger preservation guarantees
+  - Run tests on configurations that currently work (non-Docker or with JSON format)
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code in working scenarios
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [ ] 3. Fix Settings class CORS_ORIGINS parsing for Docker environments
+
+  - [ ] 3.1 Implement the fix in backend/app/core/config.py
+    - Update CORS_ORIGINS field to use Field with appropriate configuration to prevent automatic JSON parsing before validator
+    - Ensure parse_cors_origins validator with mode='before' runs before pydantic-settings attempts JSON deserialization
+    - Make validator robust to handle multiple input formats: already-parsed list (from JSON), comma-separated string, empty string, None
+    - Add explicit type checking in validator: if isinstance(v, list) return as-is, if isinstance(v, str) handle comma-separated parsing with JSON fallback for backwards compatibility
+    - Handle edge cases: empty strings return empty list, whitespace-only strings return empty list, strip whitespace from individual origins
+    - Consider adding Settings.Config directives if needed (json_loads, env_nested_delimiter, or parsing strategy)
+    - Add debug logging in validator to log input type/value and parsed result for future troubleshooting
+    - _Bug_Condition: isBugCondition(context) where context.environment == "docker" AND envVarValue("CORS_ORIGINS") is comma_separated_string AND NOT valid_json_array_
+    - _Expected_Behavior: Settings successfully parses comma-separated CORS_ORIGINS into List[str] without JSON decoding errors, application starts successfully_
+    - _Preservation: JSON array format CORS_ORIGINS continues to work, all other env vars load identically, non-Docker environments unchanged_
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5_
+
+  - [ ] 3.2 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Settings Instantiation with Comma-Separated CORS_ORIGINS in Docker
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1 in Docker environment
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - Verify Settings successfully parses comma-separated CORS_ORIGINS without errors
+    - Verify application starts successfully in Docker container
+    - Verify health check endpoint responds correctly
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+  - [ ] 3.3 Verify preservation tests still pass
+    - **Property 2: Preservation** - Existing Configuration Loading
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm JSON array format CORS_ORIGINS still parses correctly
+    - Confirm all other environment variables load identically
+    - Confirm non-Docker environments work unchanged
+    - Confirm all tests still pass after fix (no regressions introduced)
+
+- [ ] 4. Checkpoint - Ensure all tests pass
+  - Run complete test suite including unit tests, property-based tests, and integration tests
+  - Verify Docker startup with test-local.sh completes successfully
+  - Verify database migrations run successfully in Docker
+  - Verify all containers (backend, frontend, worker, beat) start and respond to health checks
+  - Ensure no regressions in existing functionality
+  - If any issues arise, investigate and resolve before marking complete

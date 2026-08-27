@@ -3,6 +3,7 @@ Configuration management using pydantic-settings
 """
 from pydantic_settings import BaseSettings
 from typing import List
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -21,6 +22,13 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS: List[str] = []
+    
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(',') if origin.strip()]
+        return v
     
     # S3
     S3_ENDPOINT_URL: str
