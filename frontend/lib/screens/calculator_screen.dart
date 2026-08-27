@@ -5,6 +5,7 @@ import '../core/theme.dart';
 import '../models/service.dart';
 import '../models/estimate_result.dart';
 import '../providers/services_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/footer_widget.dart';
@@ -26,6 +27,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String? _paramsError;
   EstimateResult? _result;
   String? _calculationError;
+  bool _isCreatingOrder = false;
 
   final ApiService _apiService = ApiService();
 
@@ -84,6 +86,86 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _calculationError = e.toString().replaceAll('Exception: ', '');
         _isCalculating = false;
       });
+    }
+  }
+
+  Future<void> _createOrder() async {
+    if (_result == null || _selectedService == null) return;
+
+    // Check authentication
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isAuthenticated) {
+      // Redirect to login
+      final shouldLogin = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Требуется авторизация'),
+          content: const Text(
+            'Для создания заявки необходимо войти в систему. Перейти на страницу входа?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Войти'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldLogin == true && mounted) {
+        Navigator.pushNamed(context, '/login');
+      }
+      return;
+    }
+
+    setState(() {
+      _isCreatingOrder = true;
+    });
+
+    try {
+      final order = await _apiService.createOrder(
+        serviceId: _selectedService!.id,
+        params: _formValues,
+        estimateTotal: _result!.total,
+      );
+
+      if (mounted) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Заявка №${order.id} успешно создана'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate to order details
+        Navigator.pushNamed(
+          context,
+          '/order-details',
+          arguments: order.id,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Ошибка создания заявки: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCreatingOrder = false;
+        });
+      }
     }
   }
 
@@ -441,13 +523,47 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
             ),
             const SizedBox(height: 24),
-            TextButton.icon(
-              onPressed: () => _showBreakdownModal(context),
-              icon: const Icon(Icons.info_outline),
-              label: const Text('Посмотреть детализацию'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.primaryColor,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: () => _showBreakdownModal(context),
+                    icon: const Icon(Icons.info_outline),
+                    label: const Text('Посмотреть детализацию'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppTheme.primaryColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _isCreatingOrder ? null : _createOrder,
+                    icon: _isCreatingOrder
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.add_shopping_cart),
+                    label: Text(_isCreatingOrder ? 'Создание...' : 'Создать заявку'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.accentColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
