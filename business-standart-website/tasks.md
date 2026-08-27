@@ -423,21 +423,21 @@
 
 ### 18. Order Management
 
-- [~] 18.1 OrderManagement сервис
+- [x] 18.1 OrderManagement сервис
   - backend/app/services/order_management.py
   - create_order() на основе калькулятора
   - Статус awaiting_payment
   - Сохранение params, estimate_total в JSONB
   - _Требования: 2.1, 2.2_
 
-- [~] 18.2 Машина состояний заявок
+- [x] 18.2 Машина состояний заявок
   - enum OrderStatus
   - validate_status_transition() с графом
   - update_order_status() с валидацией
   - Запись в OrderStatusHistory
   - _Требования: 2.3, 2.5, 15.1-15.7, 18.1_
 
-- [~] 18.3 Логика deadline
+- [x] 18.3 Логика deadline
   - calculate_deadline() с рабочими днями (2-5)
   - Автоустановка при paid
   - Исключение выходных
@@ -451,21 +451,21 @@
 
 ### 19. API заявок
 
-- [~] 19.1 POST /api/orders/create
+- [x] 19.1 POST /api/orders/create
   - service_id, params, estimate_total от auth пользователя
   - order_management.create_order()
   - Возврат order_id, payment_url (заглушка)
   - Rate limiting: 5 req/min
   - _Требования: 2.1, 2.2, 12.8_
 
-- [~] 19.2 GET /api/orders/my
+- [x] 19.2 GET /api/orders/my
   - Список заявок пользователя
   - Фильтр ?status=paid
   - Сортировка created_at DESC
   - Пагинация (offset, limit)
   - _Требования: 2.4, 11.2_
 
-- [~] 19.3 GET /api/orders/{order_id}
+- [x] 19.3 GET /api/orders/{order_id}
   - Детали заявки
   - Проверка владельца (403)
   - История статусов
@@ -480,7 +480,7 @@
 
 ### 20. Frontend - регистрация и кабинет
 
-- [~] 20.1 Страницы регистрации и входа
+- [ ] 20.1 Страницы регистрации и входа
   - RegisterScreen (телефон, пароль, имя)
   - LoginScreen (телефон, пароль)
   - Валидация на клиенте

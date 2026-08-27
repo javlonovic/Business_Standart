@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from app.core.config import settings
 from app.core.exceptions import validation_exception_handler, general_exception_handler
 from app.api import services, content, admin
-from app.api import currency_rates, calculator, auth
+from app.api import currency_rates, calculator, auth, orders
 
 app = FastAPI(
     title="Business Standart API",
@@ -36,6 +36,7 @@ app.include_router(admin.router)
 app.include_router(currency_rates.router)
 app.include_router(calculator.router)
 app.include_router(auth.router)
+app.include_router(orders.router)
 
 
 @app.get("/")
