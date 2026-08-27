@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
-    # CORS
-    CORS_ORIGINS: List[str] = []
+    # CORS - Use Union to prevent automatic JSON parsing
+    CORS_ORIGINS: Union[str, List[str]] = []
     
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod
