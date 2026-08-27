@@ -36,9 +36,9 @@
   - Mark task complete when tests are written, run, and passing on unfixed code in working scenarios
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [-] 3. Fix Settings class CORS_ORIGINS parsing for Docker environments
+- [x] 3. Fix Settings class CORS_ORIGINS parsing for Docker environments
 
-  - [ ] 3.1 Implement the fix in backend/app/core/config.py
+  - [x] 3.1 Implement the fix in backend/app/core/config.py
     - Update CORS_ORIGINS field to use Field with appropriate configuration to prevent automatic JSON parsing before validator
     - Ensure parse_cors_origins validator with mode='before' runs before pydantic-settings attempts JSON deserialization
     - Make validator robust to handle multiple input formats: already-parsed list (from JSON), comma-separated string, empty string, None
@@ -51,7 +51,7 @@
     - _Preservation: JSON array format CORS_ORIGINS continues to work, all other env vars load identically, non-Docker environments unchanged_
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 3.2 Verify bug condition exploration test now passes
+  - [x] 3.2 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - Settings Instantiation with Comma-Separated CORS_ORIGINS in Docker
     - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
     - The test from task 1 encodes the expected behavior
@@ -63,7 +63,7 @@
     - Verify health check endpoint responds correctly
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [ ] 3.3 Verify preservation tests still pass
+  - [x] 3.3 Verify preservation tests still pass
     - **Property 2: Preservation** - Existing Configuration Loading
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
     - Run preservation property tests from step 2
@@ -73,7 +73,7 @@
     - Confirm non-Docker environments work unchanged
     - Confirm all tests still pass after fix (no regressions introduced)
 
-- [ ] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Run complete test suite including unit tests, property-based tests, and integration tests
   - Verify Docker startup with test-local.sh completes successfully
   - Verify database migrations run successfully in Docker

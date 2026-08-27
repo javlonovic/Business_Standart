@@ -2,8 +2,8 @@
 Configuration management using pydantic-settings
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import field_validator
-from typing import List, Union
+from pydantic import field_validator, Field
+from typing import List, Union, Any
 
 
 class Settings(BaseSettings):
@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
-    # CORS - Use Union to prevent automatic JSON parsing
-    CORS_ORIGINS: Union[str, List[str]] = []
+    # CORS - Accept as Any to prevent automatic JSON parsing, validator will handle conversion
+    CORS_ORIGINS: Any = Field(default=[])
     
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod

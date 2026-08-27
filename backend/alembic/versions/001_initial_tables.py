@@ -1,4 +1,4 @@
-    """Initial tables
+"""Initial tables
 
 Revision ID: 001
 Revises: 
