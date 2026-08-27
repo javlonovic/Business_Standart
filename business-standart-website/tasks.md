@@ -406,7 +406,7 @@
   - Dependency get_current_user()
   - _Требования: 7.6-7.8_
 
-- [-] 17.3 API регистрации и входа
+- [x] 17.3 API регистрации и входа
   - POST /api/auth/register (phone, password, full_name)
   - POST /api/auth/login (phone, password)
   - Валидация +998XXXXXXXXX, уникальность
@@ -502,7 +502,7 @@
   - Отображение: номер, услуга, сумма, статус, дата, deadline
   - _Требования: 2.4_
 
-- [~] 20.4 Страница деталей заявки
+- [x] 20.4 Страница деталей заявки
   - OrderDetailScreen
   - Полная информация
   - Breakdown расчёта
