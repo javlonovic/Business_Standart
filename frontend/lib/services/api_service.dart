@@ -340,3 +340,97 @@ class ApiService {
     }
   }
 }
+
+  // ========== Payments ==========
+  
+  /// Создать платёж для заявки
+  Future<Map<String, dynamic>> createPayment({
+    required int orderId,
+    required String provider, // 'payme' or 'click'
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/payments/create'),
+        headers: headers,
+        body: json.encode({
+          'order_id': orderId,
+          'provider': provider,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(utf8.decode(response.bodyBytes));
+      } else if (response.statusCode == 401) {
+        throw Exception('Требуется авторизация');
+      } else if (response.statusCode == 403) {
+        throw Exception('Доступ запрещён');
+      } else if (response.statusCode == 404) {
+        throw Exception('Заявка не найдена');
+      } else {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        throw Exception(data['detail'] ?? 'Ошибка создания платежа');
+      }
+    } catch (e) {
+      throw Exception('Не удалось создать платёж: $e');
+    }
+  }
+
+  /// Получить историю платежей для заявки
+  Future<List<Map<String, dynamic>>> getOrderPayments(int orderId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/payments/order/$orderId'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes)) as List;
+        return data.cast<Map<String, dynamic>>();
+      } else if (response.statusCode == 401) {
+        throw Exception('Требуется авторизация');
+      } else if (response.statusCode == 403) {
+        throw Exception('Доступ запрещён');
+      } else {
+        throw Exception('Ошибка загрузки истории платежей');
+      }
+    } catch (e) {
+      throw Exception('Не удалось загрузить историю платежей: $e');
+    }
+  }
+
+  /// Симулировать успешный платёж (только для тестирования)
+  Future<Map<String, dynamic>> simulatePaymentSuccess(String externalId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/payments/stub/simulate-success/$externalId'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(utf8.decode(response.bodyBytes));
+      } else {
+        throw Exception('Ошибка симуляции платежа');
+      }
+    } catch (e) {
+      throw Exception('Не удалось симулировать платёж: $e');
+    }
+  }
+
+  /// Симулировать провал платежа (только для тестирования)
+  Future<Map<String, dynamic>> simulatePaymentFailure(String externalId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/payments/stub/simulate-failure/$externalId'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(utf8.decode(response.bodyBytes));
+      } else {
+        throw Exception('Ошибка симуляции платежа');
+      }
+    } catch (e) {
+      throw Exception('Не удалось симулировать платёж: $e');
+    }
+  }
+}

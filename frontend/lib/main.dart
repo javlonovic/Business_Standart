@@ -14,6 +14,7 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/cabinet_screen.dart';
 import 'screens/order_detail_screen.dart';
+import 'screens/payment_screen.dart';
 import 'core/theme.dart';
 
 void main() {
@@ -58,6 +59,17 @@ class BusinessStandartApp extends StatelessWidget {
               builder: (context) => OrderDetailScreen(orderId: orderId),
             );
           }
+          
+          if (settings.name == '/payment') {
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => PaymentScreen(
+                orderId: args['orderId'] as int,
+                amount: args['amount'] as double,
+              ),
+            );
+          }
+          
           return null;
         },
       ),

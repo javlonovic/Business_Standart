@@ -38,11 +38,8 @@ services:
     container_name: business_standart_backend
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/business_standart
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    env_file:
+      - ./backend/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,11 +55,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: business_standart_celery_worker
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/business_standart
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    env_file:
+      - ./backend/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,11 +77,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: business_standart_celery_beat
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/business_standart
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    env_file:
+      - ./backend/.env
     depends_on:
       postgres:
         condition: service_healthy

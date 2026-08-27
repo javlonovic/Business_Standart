@@ -193,13 +193,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Navigate to payment selection
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Функция оплаты будет реализована в Фазе 5'),
-                      ),
+                  onPressed: () async {
+                    // Navigate to payment screen
+                    final result = await Navigator.pushNamed(
+                      context,
+                      '/payment',
+                      arguments: {
+                        'orderId': _order!.id,
+                        'amount': _order!.estimateTotal,
+                      },
                     );
+                    
+                    // Reload order if payment was successful
+                    if (result == true && mounted) {
+                      _loadOrder();
+                    }
                   },
                   icon: const Icon(Icons.payment),
                   label: const Text('Оплатить'),
