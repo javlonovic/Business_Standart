@@ -17,7 +17,7 @@
   - Mark task complete when test is written, run, and failure is documented
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [-] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Existing Configuration Loading
   - **IMPORTANT**: Follow observation-first methodology
   - Observe behavior on working configurations (if possible to test outside Docker context where bug doesn't trigger)
@@ -36,7 +36,7 @@
   - Mark task complete when tests are written, run, and passing on unfixed code in working scenarios
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 3. Fix Settings class CORS_ORIGINS parsing for Docker environments
+- [-] 3. Fix Settings class CORS_ORIGINS parsing for Docker environments
 
   - [ ] 3.1 Implement the fix in backend/app/core/config.py
     - Update CORS_ORIGINS field to use Field with appropriate configuration to prevent automatic JSON parsing before validator

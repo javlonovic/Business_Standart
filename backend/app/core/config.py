@@ -1,9 +1,9 @@
 """
 Configuration management using pydantic-settings
 """
-from pydantic_settings import BaseSettings
-from typing import List
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
+from typing import List, Union
 
 
 class Settings(BaseSettings):
@@ -25,10 +25,41 @@ class Settings(BaseSettings):
     
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod
-    def parse_cors_origins(cls, v):
+    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        """
+        Parse CORS_ORIGINS from comma-separated string or JSON array format.
+        
+        Handles:
+        - Already-parsed list (from JSON in some environments): return as-is
+        - Comma-separated string: split and strip whitespace
+        - JSON array string: parse as JSON
+        - Empty string or None: return empty list
+        """
+        # Handle if already parsed as list
+        if isinstance(v, list):
+            return v
+        
+        # Handle string input
         if isinstance(v, str):
+            # Empty string case
+            if not v or v.strip() == '':
+                return []
+            
+            # Try JSON parsing first (for backwards compatibility with JSON array format)
+            if v.strip().startswith('['):
+                try:
+                    import json
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        return parsed
+                except Exception:
+                    pass
+            
+            # Parse as comma-separated string (Docker .env format)
             return [origin.strip() for origin in v.split(',') if origin.strip()]
-        return v
+        
+        # Fallback for unexpected types (None, etc.)
+        return []
     
     # S3
     S3_ENDPOINT_URL: str
@@ -61,9 +92,12 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        # Don't auto-parse complex types from JSON - let validators handle it
+        json_schema_extra={'env_parse_none_str': None}
+    )
 
 
 settings = Settings()

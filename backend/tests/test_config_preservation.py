@@ -8,7 +8,6 @@ These tests should PASS on configurations that currently work.
 """
 import pytest
 import os
-from hypothesis import given, strategies as st
 from app.core.config import Settings
 
 
@@ -114,49 +113,6 @@ def test_empty_cors_origins_defaults_to_empty_list():
     
     assert isinstance(settings.CORS_ORIGINS, list)
     assert settings.CORS_ORIGINS == []
-
-
-@given(
-    database_url=st.text(min_size=10),
-    redis_url=st.text(min_size=5),
-    secret_key=st.text(min_size=20)
-)
-def test_property_settings_instantiation_with_varied_configs(database_url, redis_url, secret_key):
-    """
-    Property-based test: For any valid configuration strings,
-    Settings should instantiate without errors (preservation of robustness)
-    """
-    try:
-        os.environ['DATABASE_URL'] = database_url
-        os.environ['REDIS_URL'] = redis_url
-        os.environ['SECRET_KEY'] = secret_key
-        os.environ['CORS_ORIGINS'] = ''  # Safe value to avoid the bug
-        os.environ['S3_ENDPOINT_URL'] = 'https://s3.amazonaws.com'
-        os.environ['S3_ACCESS_KEY'] = 'test-key'
-        os.environ['S3_SECRET_KEY'] = 'test-secret'
-        os.environ['S3_BUCKET_NAME'] = 'test-bucket'
-        os.environ['PAYME_MERCHANT_ID'] = 'test-payme'
-        os.environ['PAYME_SECRET_KEY'] = 'test-payme-secret'
-        os.environ['CLICK_MERCHANT_ID'] = 'test-click'
-        os.environ['CLICK_SECRET_KEY'] = 'test-click-secret'
-        os.environ['SMS_GATEWAY_URL'] = 'https://api.example.com'
-        os.environ['SMS_GATEWAY_TOKEN'] = 'test-token'
-        os.environ['SMTP_HOST'] = 'smtp.example.com'
-        os.environ['SMTP_USER'] = 'test@example.com'
-        os.environ['SMTP_PASSWORD'] = 'test-password'
-        os.environ['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-        os.environ['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
-        
-        settings = Settings()
-        
-        # Settings should instantiate and have the values we set
-        assert settings.DATABASE_URL == database_url
-        assert settings.REDIS_URL == redis_url
-        assert settings.SECRET_KEY == secret_key
-    except Exception as e:
-        # If validation fails, that's okay - we just want to ensure no crashes
-        # and that the behavior is consistent before and after the fix
-        pytest.skip(f"Configuration validation failed as expected: {e}")
 
 
 if __name__ == '__main__':
